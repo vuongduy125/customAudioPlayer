@@ -2,22 +2,37 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 var music = document.getElementById('music');
 var pButton = document.getElementById('pButton'); 
-const currentTimeContainer = document.getElementById('current-time');
-const durationContainer = document.getElementById('duration');
-const seekSlider = document.getElementById('seek-slider');
-const vButton = document.getElementById('vButton');
-const volSlider = document.getElementById('volume-slider');
-const volumeReg = document.getElementById('volume-reg');
+var currentTimeContainer = document.getElementById('current-time');
+var durationContainer = document.getElementById('duration');
+var seekSlider = document.getElementById('seek-slider');
+var vButton = document.getElementById('vButton');
+var volSlider = document.getElementById('volume-slider');
+var volumeReg = document.getElementById('volume-reg');
+var raf;
 
-const calculateTime = (secs) => {
-    const minutes = Math.floor(secs / 60);
-    const seconds = Math.floor(secs % 60);
-    const returnedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
-    const returnedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-    return `${returnedMinutes}:${returnedSeconds}`;
+var isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+if(isIE11){
+    seekSlider.style.marginTop = "18px";
 }
 
-const whilePlaying = () => {
+// get display time
+function calculateTime (secs) {
+    var minutes = Math.floor(secs / 60);
+    var seconds = Math.floor(secs % 60);
+    var returnedSeconds = seconds.toString();
+    if(seconds < 10){
+        returnedSeconds = '0' + returnedSeconds;
+    }
+    
+    var returnedMinutes = minutes.toString();
+    if(minutes < 10){
+        returnedMinutes = '0' + returnedMinutes;
+    }
+    return returnedMinutes + ':' + returnedSeconds;
+}
+
+// animation
+function whilePlaying() {
     var currentTime = Math.floor(music.currentTime);
     var durrationTime = Math.floor(music.duration);
     var seekValue = Math.floor(currentTime/durrationTime * 100);
@@ -33,7 +48,8 @@ const whilePlaying = () => {
     raf = requestAnimationFrame(whilePlaying);
 }
 
-const displayDuration = () => {
+// duration music
+function displayDuration() {
     durationContainer.textContent = calculateTime(Math.floor(music.duration));
 }
 
@@ -42,47 +58,55 @@ if (music.readyState > 0) {
     // display duration
     displayDuration();
 } else {
-    music.addEventListener('loadedmetadata', () => {
+    music.addEventListener('loadedmetadata', function() {
         displayDuration();
     });
 }
 
 // range change
-seekSlider.addEventListener('input', () => {
+seekSlider.addEventListener('change', function() {
+    cancelAnimationFrame(raf);
     var durrationTime = Math.floor(music.duration);
     var jumpTime = Math.floor(seekSlider.value/100 * durrationTime);
     currentTimeContainer.textContent = calculateTime(jumpTime);
-    cancelAnimationFrame(raf);
+});
+
+// jump music mouse up
+seekSlider.addEventListener('mouseup', function() {
+    var durrationTime = Math.floor(music.duration);
+    var jumpTime = Math.floor(seekSlider.value/100 * durrationTime);
+    music.currentTime = jumpTime;
+    raf = requestAnimationFrame(whilePlaying);
 });
 
 // volume show/hide
-vButton.addEventListener('mouseover', () => {
+vButton.addEventListener('mouseover', function() {
     volSlider.style.visibility = "visible";
 });
-volumeReg.addEventListener('mouseleave', () => {
+volumeReg.addEventListener('mouseleave', function() {
     volSlider.style.visibility = "hidden";
 });
 
-volSlider.addEventListener('mouseover', () => {
+volSlider.addEventListener('mouseover', function() {
     if(volSlider.style.visibility.toString() != 'hidden')
     {
         volSlider.style.visibility = "visible";
     }
 });
 
-vButton.addEventListener('mouseover', () => {
+vButton.addEventListener('mouseover', function() {
     volSlider.style.visibility = "visible";
 });
 
 // volume change
-volSlider.addEventListener('input', () => {
+volSlider.addEventListener('change', function() {
     var volValue = volSlider.value;
     setLevelVolume();
     music.volume = volValue / 100;
 });
 
 // volume mute/unmute
-vButton.addEventListener('click', () => {
+vButton.addEventListener('click', function() {
     var volValue = volSlider.value;
     vButton.className = "";
     if(volValue == 0){
@@ -95,14 +119,6 @@ vButton.addEventListener('click', () => {
         volSlider.value = 0;
         vButton.className = "mute";
     }
-});
-
-// jump music mouse up
-seekSlider.addEventListener('mouseup', () => {
-    var durrationTime = Math.floor(music.duration);
-    var jumpTime = Math.floor(seekSlider.value/100 * durrationTime);
-    music.currentTime = jumpTime;
-    raf = requestAnimationFrame(whilePlaying);
 });
 
 // play button event listenter

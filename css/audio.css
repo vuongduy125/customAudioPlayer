@@ -6,16 +6,16 @@
 }
 /*Container for audio player*/
 #audioplayer{
-	width: 550px;
-	height: 40px;
+	width: 520px;
+	height: 25px;
 	margin: auto;
 	/* margin-top: 50px; */
 	border: solid;
 }
 /* Play/Pause Button */
 #pButton, #vButton{
-	height:40px;
-	width: 40px;
+	height:25px;
+	width: 25px;
 	border: none;
 	background-size: 50% 50%;
 	background-repeat: no-repeat;
@@ -40,3 +40,11 @@ input[type=range][orient=vertical]
     height: 175px;
     padding: 0 5px;
 }
+
+.vertical-center {
+	margin: 0;
+	/* position: absolute; */
+	top: 50%;
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+  }
